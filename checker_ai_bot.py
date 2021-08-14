@@ -28,19 +28,19 @@ class Piece:
         self.color = color
         self.row = row
         self.col = col
-        self.player = 0 # If player is White
+        self.player = 0  # If player is White
         self.up = False
         self.down = False
         if self.color == 'B' or self.color == 'b':
             self.player = Player.BLACK
             self.down = True
         else:
-            self.up = True   # for white players 
-        
+            self.up = True   # for white players
+
         if self.color == 'B' or self.color == 'W':
             self.up = True
             self.down = True
-    
+
     def __repr__(self):
         return str(self.color) + " " + str(self.player)
 
@@ -48,7 +48,7 @@ class Piece:
         if self.color == 'B' or self.color == 'W':
             return True
         return False
-    
+
     def make_king(self):
         if self.color == 'b':
             self.color = 'B'
@@ -60,6 +60,7 @@ class Piece:
     def get_opponent_player(self):
         opponent = Player.WHITE if self.player == Player.BLACK else Player.BLACK
         return opponent
+
 
 class Board:
     def __init__(self):
@@ -76,37 +77,37 @@ class Board:
         pieces = []
         for row in self.board:
             for p in row:
-                if p != None and p.player == player:
+                if p is not None and p.player == player:
                     pieces.append(p)
         return pieces
-    
+
     def make_move(self, piece, r, c):
         self.board[piece.row][piece.col] = None
         self.board[r][c] = piece
         piece.row = r
         piece.col = c
 
-        #check if row or column is king line
-        if not piece.isKing() and (r == 0 or r == self.rows - 1 ):
+        # check if row or column is king line
+        if not piece.isKing() and (r == 0 or r == self.rows - 1):
             piece.make_king()
             if piece.color == 'W':
-                self.white_kings +=1
+                self.white_kings += 1
             else:
-                self.black_kings +=1
-    
+                self.black_kings += 1
+
     def remove_captured_pieces(self, pieces):
         for piece in pieces:
             self.board[piece.row][piece.col] = None
-            if piece != None:
+            if piece is not None:
                 if piece.player == Player.BLACK:
                     self.black_left -= 1
                     if piece.isKing():
-                        self.black_kings -=1
+                        self.black_kings -= 1
                 else:
                     self.white_left -= 1
                     if piece.isKing():
-                            self.white_kings -=1
-    
+                            self.white_kings -= 1
+
     def create_board(self, boardState):
         self.board = []
         for r in range(self.rows):
@@ -118,17 +119,17 @@ class Board:
                     self.update_piece_count(piece)
                 else:
                     self.board[r].append(None)
-    
+
     def update_piece_count(self, piece):
-        if piece.color == 'b'or piece.color =='B':
+        if piece.color == 'b' or piece.color == 'B':
             self.black_left += 1
             if piece.color == 'B':
-                self.black_kings +=1
+                self.black_kings += 1
         else:
-            self.white_left +=1
+            self.white_left += 1
             if piece.color == 'W':
-                self.white_kings +=1
-        
+                self.white_kings += 1
+
     def get_board_state(self):
         return self.board
 
@@ -139,12 +140,12 @@ class Board:
 
     def print_board(self):
         print("*********** BOARD *************")
-        for i in range (self.cols):
-            if i == 0 :
+        for i in range(self.cols):
+            if i == 0:
                 print("{:2}|".format("\\").rjust(2), end=" ")
             print("{:2d}|".format(i), end=" ")
         print()
-        
+
         i = 0
         for row in self.board:
             print("-"*35)
@@ -166,28 +167,28 @@ class Board:
         print("*********** END *************")
 
     def get_evaluation(self, maxPlayer, player):
-        random_num = randint(1,5)
-        if maxPlayer = player:
+        random_num = randint(1, 5)
+        if maxPlayer == player:
             return self.get_board_pieces_valuation(player) + self.king_row_dist(player) + random_num
         else:
-            val = self.get_board_pieces_valuation(player) + self.king_row_dist(player) 
-            val = -val + random_num 
-            return val 
-        
+            val = self.get_board_pieces_valuation(player) + self.king_row_dist(player)
+            val = -val + random_num
+            return val
+
     def get_board_pieces_valuation(self, player):
         result = 0
         opponent = Player.BLACK if player == Player.WHITE else Player.WHITE
-        
+
         for i in range(8):
             for j in range(8):
                 piece = self.board[i][j]
                 if not piece:
                     continue
 
-                # safe at conrners 
+                # safe at conrners
                 if i == 0 or j == 0 or i == 7 or j == 7:
                     result += 7
-                
+
                 if piece.player == opponent:
                     jumps = self.get_jump_directions(piece)
                     if len(jumps) == 0:
@@ -203,12 +204,12 @@ class Board:
 
         total = self.black_left + self.white_left
         if player == Player.BLACK:
-            total += (self.black_left - self.white_left) *5
-            total += (self.black_kings - self.white_kings)*7
+            total += (self.black_left - self.white_left) * 5
+            total += (self.black_kings - self.white_kings) * 7
         else:
-            total += (self.white_left -  self.black_left) *5
-            total += (self.white_kings - self.black_kings)*7
-        
+            total += (self.white_left - self.black_left) * 5
+            total += (self.white_kings - self.black_kings) * 7
+
         result += total
         return result
 
@@ -223,14 +224,14 @@ class Board:
                         continue
                     if piece.color == 'b':
                         val += piece.row
-                    if r == 6 and piece.color =="b":
+                    if r == 6 and piece.color == 'b':
                         val += 3
             if self.black_left > 0:
                 val = val//self.black_left
                 return val
             else:
                 return 0
-            
+
         else:
             for r in range(self.rows):
                 for c in range(self.cols):
@@ -240,49 +241,49 @@ class Board:
                         continue
                     if piece.color == 'w':
                         val += 7 - piece.row
-                    if r == 1 and piece.color =="w":
+                    if r == 1 and piece.color == 'w':
                         val += 3
             if self.white_left > 0:
                 val = val//self.white_left
                 return val
-            else: 
+            else:
                 return 0
 
     def get_diagonal_directions(self, piece):
         directions = []
-        left = piece.col -1
-        right = piece.col +1
+        left = piece.col - 1
+        right = piece.col + 1
         if piece.up:
-            to = (piece.row - 1 , left)
+            to = (piece.row - 1, left)
             if self.is_valid_diagonal_move(piece, to):
                 directions.append(to)
-            to = (piece.row - 1 , right)
+            to = (piece.row - 1, right)
             if self.is_valid_diagonal_move(piece, to):
                 directions.append(to)
         if piece.down:
-            to = (piece.row + 1 , left)
+            to = (piece.row + 1, left)
             if self.is_valid_diagonal_move(piece, to):
                 directions.append(to)
-            to = (piece.row + 1 , right)
+            to = (piece.row + 1, right)
             if self.is_valid_diagonal_move(piece, to):
                 directions.append(to)
         return directions
-    
+
     def get_jump_directions(self, piece):
         directions = {}
-        left = piece.col -1
-        right = piece.col +1
+        # left = piece.col - 1
+        # right = piece.col + 1
         if piece.up:
             for dir in UP:
                 to = (piece.row+dir[0], piece.col+dir[1])
                 via = (piece.row+(dir[0]//2), piece.col + (dir[1]//2))
-                if self.is_valid_jump(piece, to , via):
+                if self.is_valid_jump(piece, to, via):
                     directions[to] = via
-        if piece.down: # piece is moving down
+        if piece.down:  # piece is moving down
             for dir in DOWN:
                 to = (piece.row+dir[0], piece.col+dir[1])
                 via = (piece.row+(dir[0]//2), piece.col + (dir[1]//2))
-                if self.is_valid_jump(piece, to , via):
+                if self.is_valid_jump(piece, to, via):
                     directions[to] = via
         return directions
 
@@ -295,15 +296,18 @@ class Board:
         return self.board[row][col]
 
     def is_valid_jump(self, piece, to, via):
-        if self.within_boundries(to[0], to[1]) and self.get_piece(to[0], to[1]) == None and self.get_piece(via[0], via[1])!= None  and self.get_piece(via[0], via[1]).player == piece.get_opponent_player():
+        if self.within_boundries(to[0], to[1]) and \
+           self.get_piece(to[0], to[1]) is None and \
+           self.get_piece(via[0], via[1]) is not None and \
+           self.get_piece(via[0], via[1]).player == piece.get_opponent_player():
             return True
         return False
-    
+
     def is_valid_diagonal_move(self, piece, to):
-        if self.within_boundries(to[0], to[1]) and self.get_piece(to[0], to[1]) == None:
+        if self.within_boundries(to[0], to[1]) and self.get_piece(to[0], to[1]) is None:
             return True
         return False
-    
+
 
 class Game:
     def __init__(self):
@@ -316,21 +320,21 @@ class Game:
         self.TimeLimitExceeded = False
         self.allowed_time = 3
         self.start_time = 0
-    
-    # jump sequence for a player 
+
+    # jump sequence for a player
     def get_jump_sequences(self, board, player):
         jump_sequences = []
         for piece in board.get_all_pieces(player):
-            #print("Getting jump sequences")
+            # print("Getting jump sequences")
             # get possible jumps of piece
-            possible_jumps = self.get_all_possible_jumps(board,piece, piece)
-            #print("possible jumps : ",possible_jumps)
-            #board.print_board()
-            if possible_jumps !=None:
+            possible_jumps = self.get_all_possible_jumps(board, piece, piece)
+            # print("possible jumps : ",possible_jumps)
+            # board.print_board()
+            if possible_jumps is not None:
                 for jump in possible_jumps:
-                    jump_sequences.append(jump)  
+                    jump_sequences.append(jump)
         return jump_sequences
-    
+
     # jump sequence for a piece
     def get_all_possible_jumps(self, board, piece, from_piece, jumps=[], skipped=[]):
         moves = []
@@ -343,13 +347,13 @@ class Game:
                 temp_board = deepcopy(board)
                 temp_piece = temp_board.get_piece(piece.row, piece.col)
                 # print(to, via)
-                #piece, move, board, captured_pieces
+                # piece, move, board, captured_pieces
                 flag = temp_piece.isKing()
                 temp_board = self.play_move(temp_piece, to, temp_board, [temp_board.get_piece(via[0], via[1])])
                 # get double or multijumps of piece
                 # If piece is converted to king so end the move
                 if not flag and temp_piece.isKing():
-                 #   print("Flag1")
+                    #  print("Flag1")
                     flag = True
                     moves.append((temp_board, jumps+[to], skipped+[via], from_piece))
                     return moves
@@ -357,18 +361,18 @@ class Game:
                 # print(j)
                 if j:
                     moves = moves + j
-        elif jumps: 
+        elif jumps:
             moves.append((board, jumps, skipped, from_piece))
             return moves
-        
+
         return moves
 
     def get_diagonal_moves(self, board, player):
-        #print("Get dignoal moves for player : ", player)
+        # print("Get dignoal moves for player : ", player)
         moves = []
         for piece in board.get_all_pieces(player):
             directions = board.get_diagonal_directions(piece)
-            if directions: 
+            if directions:
                 for to in directions:
                     temp_board = deepcopy(board)
                     temp_piece = temp_board.get_piece(piece.row, piece.col)
@@ -377,7 +381,7 @@ class Game:
         return moves
 
     # if jump moves are not availbale then get normal diagonal moves
-    def get_all_moves(self, board, player, both = False):
+    def get_all_moves(self, board, player, both=False):
         # print("[get_all_moves] Get all moves for player :", player)
         all_jumps = self.get_jump_sequences(board, player)
         if all_jumps and not both:
@@ -394,19 +398,21 @@ class Game:
             return diagonal_moves
         if both:
             # print("[get_all_moves]")
-            if all_jumps and not diagonal_moves: return all_jumps
-            if not all_jumps and diagonal_moves: return diagonal_moves
+            if all_jumps and not diagonal_moves:
+                return all_jumps
+            if not all_jumps and diagonal_moves:
+                return diagonal_moves
             all_jumps.extend(diagonal_moves)
             return all_jumps
 
-    # just move the piece to destination 
+    # just move the piece to destination
     def play_move(self, piece, move, board, captured_pieces):
-        #print("play_move:")
+        # print("play_move:")
         board.make_move(piece, move[0], move[1])
         if captured_pieces:
             board.remove_captured_pieces(captured_pieces)
         return board
-    
+
     def print_game_data(self):
         print("Game Type     :", self.gameType)
         print("Turn          :", self.turn)
@@ -416,8 +422,8 @@ class Game:
         print("Min depth     :", self.min_depth)
         print("Max depth     :", self.max_depth)
         self.gameBoard.print_board()
-    
-    # Calculate move time 
+
+    # Calculate move time
     def update_allowed_move_time(self):
         if self.gameType == GameType.SINGLE:
             self.allowed_time = self.start_time + (self.remaining_time * 0.9)
@@ -450,7 +456,7 @@ class Game:
         else:
             best_move = all_moves[0]
             self.TimeLimitExceeded = False
-            
+
             if (self.gameBoard.black_left + self.gameBoard.white_left) >= 15:
                 self.min_depth = 3
                 self.max_depth = 7
@@ -458,19 +464,19 @@ class Game:
             if (self.gameBoard.black_left + self.gameBoard.white_left) <= 10:
                 self.min_depth +=1
                 self.max_depth +=1
-            
+
             if self.allowed_time - self.start_time < 3:
                 self.min_depth = 2
                 self.max_depth = 4
-            
+
             if self.allowed_time - self.start_time < 10:
                 self.min_depth = 2
                 self.max_depth = 6
-            
+
             if (self.gameBoard.black_left + self.gameBoard.white_left) <= 5:
                 self.min_depth +=1
                 self.max_depth +=1
-            
+
             # print("[play] Min Depth  :", self.min_depth)
             # print("[play] Max Depth  :", self.max_depth)
             for depth in range(self.min_depth, self.max_depth):
@@ -480,11 +486,11 @@ class Game:
                     break
 
                 move = self.minimax(self.gameBoard, depth, float('-inf'), float('inf'), self.turn, self.turn)[1]
-    
+
                 if not self.TimeLimitExceeded and move:
-                    
+
                     best_move = move
-                
+
                 elif self.TimeLimitExceeded:
                     break
                 t = time.time() + (self.allowed_time - self.start_time)/2
@@ -501,7 +507,7 @@ class Game:
         # print("[play] print original board")
         # self.gameBoard.print_board()
         return res
-    
+
     def get_opening_move(self, move_num):
         # print("[get_opening_move]: getting opening move")
         if move_num == 1:
@@ -514,7 +520,7 @@ class Game:
                     piece = self.gameBoard.get_piece(3, col)
                     if piece is not None and piece.player == Player.BLACK:
                         return moves[col]
-                    
+
     def map_moves(self,from_pos, moves, jumped):
         result = ""
         from_pos = str(COL_MAP[from_pos[1]]) + str(ROW_MAP[from_pos[0]])
@@ -530,21 +536,21 @@ class Game:
 
     def create_board_from_input(self, boardState):
         self.gameBoard.create_board(boardState)
-    
+
     # minimax using alpha beta pruning
     def minimax(self, board, depth, alpha, beta, maxPlayer, player):
         if depth == 0 or board.is_game_over():
             return board.get_evaluation(maxPlayer, player), board
-        
+
         if self.TimeLimitExceeded:
             # print("[minimax] :  Time limit exceeded")
             return 0, board
-        
+
         if self.allowed_time <= (time.time()):
             # print("[minimax] : Ooopz.. Time limit exceeded depth: ", depth)
             self.TimeLimitExceeded = True
             return 0 , board
-        
+
         if maxPlayer == player:
             val = float('-inf')
             best_move = None
@@ -593,12 +599,12 @@ def driver(start):
             game.gameType = GameType.GAME
         else:
             game.turn = GameType.SINGLE
-        
+
         if f.readline().rstrip() =="BLACK":
             game.turn = Player.BLACK
         else:
             game.turn = Player.WHITE
-        
+
         game.remaining_time = float(f.readline().rstrip())
         # Read the Board state
         game.start_time = start
@@ -611,14 +617,13 @@ def driver(start):
         game.create_board_from_input(boardState)
         # game.print_game_data()
         f.close()
-    
 
     if os.path.isfile(OUTPUT_FILE):
         f = open(OUTPUT_FILE, 'w')
         f.truncate()
     else:
         f = open(OUTPUT_FILE, "w")
-    
+
     # Get Moves of the player  E FROM_POS TO_POS  J FROM_POS TO_POS format
     moves = None
     if game.gameType == GameType.SINGLE:
@@ -629,22 +634,22 @@ def driver(start):
             fs = open(PLAYDATA_FILE, 'r')
             moves_so_far = int(fs.readline().rstrip())
             fs.close()
-        # initial game 
+        # initial game
         if moves_so_far < 1:
             moves = game.get_opening_move(moves_so_far+1)
-            
+
             if os.path.isfile(PLAYDATA_FILE):
                 fs = open(PLAYDATA_FILE, 'w')
                 fs.truncate()
             else:
                 fs = open(PLAYDATA_FILE, 'w')
-            
+
             fs.write(str(moves_so_far+1))
             fs.close()
-        
+
         else:
             moves = game.play()
-        
+
     f.write(moves)
     f.close()
     return game.remaining_time
@@ -653,13 +658,13 @@ def driver(start):
 #######################  Calling Driver  ###########################################
 # All program calling
 start = time.time()
-# proces_s = time.process_time() 
+# proces_s = time.process_time()
 # datetime_start = datetime.datetime.now()
 
 t = driver(start)
 
-# end = time.time() 
-# time_taken = (end - start) 
+# end = time.time()
+# time_taken = (end - start)
 # print("Total time taken : " , time_taken)
 # print("Remaining time taken : " , t - time_taken)
 
@@ -670,4 +675,3 @@ t = driver(start)
 # datetime_time_taken = datetime_end - datetime_start
 # process_taken = process_e - proces_s
 # print("Process time taken : " , process_taken)
-
